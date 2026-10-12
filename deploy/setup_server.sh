@@ -35,22 +35,27 @@ say "Setting up Thingbd for http://$HOST"
 say "1/9 Installing system packages"
 export DEBIAN_FRONTEND=noninteractive
 
-# Ubuntu's automatic updates often hold the apt lock for a few minutes after boot. Wait for them.
+# Ubuntu's automatic updates may be installing packages; wait until nobody holds the apt/dpkg locks.
+# (Checks the lock files themselves: the always-running unattended-upgrades service does not count.)
+APT_LOCKS=(/var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/lib/apt/lists/lock /var/cache/apt/archives/lock)
+apt_busy() { fuser "${APT_LOCKS[@]}" >/dev/null 2>&1; }
 wait_for_apt() {
   local waited=0
-  while pgrep -x 'apt|apt-get|dpkg|unattended-upgr' >/dev/null; do
-    if (( waited == 0 )); then echo "   another package install is running, waiting for it to finish..."; fi
-    if (( waited >= 600 )); then
-      ps -o pid,etime,cmd -p "$(pgrep -d, -x 'apt|apt-get|dpkg|unattended-upgr')"
-      die "apt is still busy after 10 minutes (process above). If it is stuck (ELAPSED of hours/days): kill <PID>, then: dpkg --configure -a, and run this script again."
+  while apt_busy; do
+    if (( waited % 60 == 0 )); then
+      echo "   Ubuntu is installing updates in the background, waiting... ($((waited / 60)) min)"
     fi
-    sleep 5; waited=$((waited + 5))
+    if (( waited >= 1800 )); then
+      fuser -v "${APT_LOCKS[@]}" 2>&1 | sed 's/^/   /'
+      die "apt is still busy after 30 minutes (process above). Check it with: ps -o pid,etime,cmd -p <PID>"
+    fi
+    sleep 10; waited=$((waited + 10))
   done
 }
 wait_for_apt
-apt-get -o DPkg::Lock::Timeout=300 update -y
+apt-get -o DPkg::Lock::Timeout=600 update -y
 wait_for_apt
-apt-get -o DPkg::Lock::Timeout=300 install -y python3 python3-venv python3-dev build-essential git nginx sqlite3 curl ufw \
+apt-get -o DPkg::Lock::Timeout=600 install -y psmisc python3 python3-venv python3-dev build-essential git nginx sqlite3 curl ufw \
   libjpeg-dev zlib1g-dev libwebp-dev
 
 # ---------------------------------------------------------------------------
