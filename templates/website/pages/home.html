@@ -1,0 +1,113 @@
+{% extends "website/base.html" %}
+
+{% block content %}
+  <section class="hero section" id="top">
+    <div class="hero-grid{% if home.hero_image %} has-image{% endif %}">
+      <div>
+        {% if home.hero_eyebrow %}<div class="eyebrow">{{ home.hero_eyebrow }}</div>{% endif %}
+        <h1>{{ home.hero_title }}{% if home.hero_highlight %}<br><span>{{ home.hero_highlight }}</span>{% endif %}</h1>
+        {% if home.hero_text %}<p class="hero-copy">{{ home.hero_text }}</p>{% endif %}
+        <div class="actions">
+          <a class="button" href="{{ home.primary_button_url }}">{{ home.primary_button_label }} <span>↗</span></a>
+          {% if home.secondary_button_label %}<a class="button ghost" href="{{ home.secondary_button_url }}">{{ home.secondary_button_label }}</a>{% endif %}
+        </div>
+      </div>
+      {% if home.hero_image %}<img class="hero-image" src="{{ home.hero_image.url }}" alt="">{% endif %}
+    </div>
+    {% if stats %}
+      <div class="stats">
+        {% for stat in stats %}<div><strong>{{ stat.value }}</strong><span>{{ stat.label }}</span></div>{% endfor %}
+      </div>
+    {% endif %}
+  </section>
+
+  {% if marquee %}
+    <div class="marquee" aria-hidden="true">
+      <div>{% for item in marquee %}{{ item.text|upper }} · {% endfor %}{% for item in marquee %}{{ item.text|upper }} · {% endfor %}</div>
+    </div>
+  {% endif %}
+
+  {% if services %}
+    <section class="section" id="services">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">01 / {{ home.services_eyebrow }}</div>
+          <h2>{{ home.services_title }}</h2>
+        </div>
+        {% if home.services_text %}<p>{{ home.services_text }}</p>{% endif %}
+      </div>
+      <div class="cards">
+        {% for service in services %}
+          <a class="card" href="{{ service.get_absolute_url }}">
+            {% if service.image %}<img class="card-image" src="{{ service.image.url }}" alt="">{% else %}<span class="icon">{{ forloop.counter|stringformat:"02d" }}</span>{% endif %}
+            <h3>{{ service.title }}</h3>
+            <p>{{ service.short_description }}</p>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% if steps %}
+    <section class="section split" id="process">
+      <div>
+        <div class="eyebrow">02 / {{ home.process_eyebrow }}</div>
+        <h2>{{ home.process_title }}</h2>
+        {% if home.process_text %}<p>{{ home.process_text }}</p>{% endif %}
+      </div>
+      {% include "website/partials/steps.html" %}
+    </section>
+  {% endif %}
+
+  {% if projects %}
+    <section class="section" id="work">
+      <div class="section-head">
+        <div><div class="eyebrow">03 / {{ home.work_eyebrow }}</div><h2>{{ home.work_title }}</h2></div>
+        <div class="head-side">
+          {% if home.work_text %}<p>{{ home.work_text }}</p>{% endif %}
+          <a class="button ghost small" href="{% url 'project_list' %}">All projects →</a>
+        </div>
+      </div>
+      {% include "website/partials/project_grid.html" %}
+    </section>
+  {% endif %}
+
+  {% if testimonials %}
+    <section class="section" id="testimonials">
+      <div class="section-head">
+        <div><div class="eyebrow">04 / {{ home.testimonials_eyebrow }}</div><h2>{{ home.testimonials_title }}</h2></div>
+      </div>
+      <div class="quotes">
+        {% for t in testimonials %}
+          <figure class="quote">
+            <div class="rating" aria-label="{{ t.rating }} out of 5">{% for i in "12345" %}<span class="{% if forloop.counter <= t.rating %}on{% endif %}">★</span>{% endfor %}</div>
+            <blockquote>“{{ t.quote }}”</blockquote>
+            <figcaption>
+              {% if t.photo %}<img src="{{ t.photo.url }}" alt="">{% else %}<span class="avatar">{{ t.name|first }}</span>{% endif %}
+              <span><strong>{{ t.name }}</strong>{% if t.role or t.company %}<small>{{ t.role }}{% if t.role and t.company %}, {% endif %}{{ t.company }}</small>{% endif %}</span>
+            </figcaption>
+          </figure>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% if faqs %}
+    <section class="section split" id="faq">
+      <div>
+        <div class="eyebrow">05 / {{ home.faq_eyebrow }}</div>
+        <h2>{{ home.faq_title }}</h2>
+      </div>
+      <div class="faq">
+        {% for faq in faqs %}
+          <details{% if forloop.first %} open{% endif %}>
+            <summary>{{ faq.question }}</summary>
+            <p>{{ faq.answer|linebreaksbr }}</p>
+          </details>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% include "website/partials/contact.html" %}
+{% endblock %}

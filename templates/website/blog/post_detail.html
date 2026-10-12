@@ -1,0 +1,34 @@
+{% extends "website/base.html" %}
+
+{% block extra_head %}{% if is_preview %}<meta name="robots" content="noindex, nofollow">{% endif %}{% endblock %}
+
+{% block content %}
+  {% if is_preview %}
+    <div class="preview-banner" role="status">
+      <strong>Preview</strong> — this post is {% if post.state == "scheduled" %}scheduled for {{ post.published_at|date:"M j, Y H:i" }}{% else %}a draft{% endif %} and only visible to dashboard users.
+      <a href="{% url 'dashboard:posts_edit' post.pk %}">Edit post</a>
+    </div>
+  {% endif %}
+  <article>
+    <section class="section narrow page-hero">
+      <a class="back" href="{% url 'post_list' %}">← All posts</a>
+      <div class="eyebrow">{{ post.published_at|date:"F j, Y" }}{% if post.category %} · <a href="{% url 'post_category' post.category.slug %}">{{ post.category.name }}</a>{% endif %} · {{ post.reading_time }} min read</div>
+      <h1 class="page-title">{{ post.title }}</h1>
+      {% if post.excerpt %}<p class="lead">{{ post.excerpt }}</p>{% endif %}
+      {% if post.author %}<p class="muted-small">By {% firstof post.author.get_full_name post.author.username %}</p>{% endif %}
+      {% if post.cover_image %}<img class="feature-image" src="{{ post.cover_image.url }}" alt="{{ post.title }}">{% endif %}
+    </section>
+    <section class="section narrow prose tight-top">{{ post.body|safe }}</section>
+  </article>
+
+  {% if related %}
+    <section class="section">
+      <div class="section-head"><div><div class="eyebrow">Keep reading</div><h2>Related posts.</h2></div></div>
+      <div class="posts">
+        {% for p in related %}<a class="post-card" href="{{ p.get_absolute_url }}"><div class="post-meta">{{ p.published_at|date:"M j, Y" }}</div><h3>{{ p.title }}</h3>{% if p.excerpt %}<p>{{ p.excerpt }}</p>{% endif %}</a>{% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% include "website/partials/cta.html" %}
+{% endblock %}

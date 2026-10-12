@@ -1,0 +1,6 @@
+{% autoescape off %}{{ body }}
+
+--
+{{ site.site_name }} · {{ site.tagline }}{% if site.email %}
+{{ site.email }}{% endif %}{% if site.phone %} · {{ site.phone }}{% endif %}
+{% endautoescape %}

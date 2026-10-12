@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<body style="margin:0;padding:24px;background:#f6f5fa;font-family:Arial,Helvetica,sans-serif;color:#17141f;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e7e5ef;border-radius:12px;">
+    <tr>
+      <td style="padding:20px 24px;border-bottom:1px solid #e7e5ef;">
+        <span style="display:inline-block;width:28px;height:28px;line-height:28px;text-align:center;border-radius:8px;background:#8b5cf6;color:#fff;font-weight:bold;">{{ site.site_name|first }}</span>
+        <strong style="margin-left:8px;font-size:16px;">New lead</strong>
+        <span style="color:#7a7589;font-size:13px;"> · {{ site.site_name }} website</span>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:24px;">
+        <h1 style="margin:0 0 4px;font-size:20px;">{{ lead.name }}</h1>
+        <p style="margin:0 0 20px;color:#7a7589;font-size:14px;">{% if lead.service %}Interested in {{ lead.service }}{% else %}General enquiry{% endif %}{% if lead.budget %} · Budget {{ lead.budget }}{% endif %}</p>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px;margin-bottom:20px;">
+          <tr><td style="padding:4px 16px 4px 0;color:#7a7589;">Email</td><td><a href="mailto:{{ lead.email }}" style="color:#6d28d9;">{{ lead.email }}</a></td></tr>
+          {% if lead.phone %}<tr><td style="padding:4px 16px 4px 0;color:#7a7589;">Phone</td><td><a href="tel:{{ lead.phone|cut:' ' }}" style="color:#6d28d9;">{{ lead.phone }}</a></td></tr>{% endif %}
+          {% if lead.company %}<tr><td style="padding:4px 16px 4px 0;color:#7a7589;">Company</td><td>{{ lead.company }}</td></tr>{% endif %}
+        </table>
+        <div style="padding:16px;border-radius:8px;background:#faf9fd;border:1px solid #e7e5ef;font-size:14px;line-height:1.6;">{{ lead.message|linebreaksbr }}</div>
+        <p style="margin:24px 0 0;">
+          <a href="{{ dashboard_url }}" style="display:inline-block;padding:12px 18px;border-radius:8px;background:#8b5cf6;color:#ffffff;text-decoration:none;font-weight:bold;font-size:14px;">Open in dashboard</a>
+        </p>
+        <p style="margin:16px 0 0;color:#7a7589;font-size:12px;">Reply to this email to answer {{ lead.name }} directly.</p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

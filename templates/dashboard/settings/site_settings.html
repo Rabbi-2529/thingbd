@@ -1,0 +1,32 @@
+{% extends "dashboard/base.html" %}
+
+{% block subheading %}<p class="muted">Brand, contact details, social links and SEO used across the whole website.</p>{% endblock %}
+
+{% block content %}
+  <form method="post" enctype="multipart/form-data" class="card form-card" novalidate>
+    {% csrf_token %}
+    <div class="tabs" role="tablist" data-tabs>
+      {% for fs in form.get_fieldsets %}
+        <button type="button" role="tab" class="tab{% if forloop.first %} active{% endif %}" data-tab="{{ fs.slug }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+          <span class="icon">{{ fs.icon }}</span>{{ fs.title }}
+          {% for f in fs.fields %}{% if f.errors %}<span class="tab-error" title="Has errors"></span>{% endif %}{% endfor %}
+        </button>
+      {% endfor %}
+    </div>
+
+    {% for fs in form.get_fieldsets %}
+      <div class="tab-panel{% if forloop.first %} active{% endif %}" id="{{ fs.slug }}" role="tabpanel">
+        <div class="form-grid">
+          {% for field in fs.fields %}
+            {% include "dashboard/partials/field.html" %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+
+    <div class="form-actions">
+      <a class="button button-ghost" href="{% url 'dashboard:index' %}">Cancel</a>
+      <button type="submit" class="button button-primary"><span class="icon">save</span> Save changes</button>
+    </div>
+  </form>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "dashboard/base.html" %}
+
+{% block breadcrumbs %}
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="{% url 'dashboard:index' %}">Dashboard</a>
+    <span class="icon">chevron_right</span>
+    <a href="{{ list_url }}">Leads</a>
+  </nav>
+{% endblock %}
+{% block heading %}{{ lead.name }} <span class="badge badge-{{ lead.status }} heading-badge">{{ lead.get_status_display }}</span>{% endblock %}
+{% block subheading %}<p class="muted">Received {{ lead.created_at|date:"l, M j, Y \a\t H:i" }} · {{ lead.created_at|timesince }} ago</p>{% endblock %}
+{% block actions %}
+  {% if newer %}<a class="icon-button" href="{{ newer.get_dashboard_url }}" title="Newer lead"><span class="icon">chevron_left</span></a>{% endif %}
+  {% if older %}<a class="icon-button" href="{{ older.get_dashboard_url }}" title="Older lead"><span class="icon">chevron_right</span></a>{% endif %}
+  <a class="button button-primary" href="mailto:{{ lead.email }}?subject={{ 'Re: your enquiry to '|add:site.site_name|urlencode }}"><span class="icon">reply</span> Reply by email</a>
+{% endblock %}
+
+{% block content %}
+  <section class="card pipeline-card">
+    <form method="post" class="pipeline" aria-label="Lead status">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="status">
+      {% for step in pipeline %}
+        <button type="submit" name="status" value="{{ step.value }}"
+                class="pipeline-step step-{{ step.value }}{% if step.current %} current{% endif %}{% if step.done %} done{% endif %}"
+                {% if step.current %}aria-current="step" disabled{% endif %}>
+          <span class="step-dot">{% if step.done %}<span class="icon">check</span>{% else %}{{ forloop.counter }}{% endif %}</span>
+          <span class="step-label">{{ step.label }}</span>
+        </button>
+      {% endfor %}
+    </form>
+  </section>
+
+  <div class="edit-layout">
+    <div class="edit-main">
+      <section class="card">
+        <div class="card-header"><h2><span class="icon">chat</span>Message</h2></div>
+        <div class="form-body lead-message">{{ lead.message|linebreaks }}</div>
+      </section>
+
+      <section class="card">
+        <div class="card-header"><h2><span class="icon">history</span>Notes &amp; activity</h2></div>
+        <form method="post" class="form-body note-form" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="action" value="note">
+          {% include "dashboard/partials/field.html" with field=note_form.text %}
+          <div><button type="submit" class="button button-primary button-sm"><span class="icon">add_comment</span> Add note</button></div>
+        </form>
+        <ol class="timeline">
+          {% for item in timeline %}
+            <li class="timeline-item kind-{{ item.kind }}">
+              <span class="timeline-icon"><span class="icon">{% if item.kind == "status" %}swap_horiz{% else %}sticky_note_2{% endif %}</span></span>
+              <div class="timeline-body">
+                <div class="timeline-meta">
+                  <strong>{% if item.author %}{% firstof item.author.get_full_name item.author.username %}{% else %}System{% endif %}</strong>
+                  <span class="muted small" title="{{ item.created_at|date:'M j, Y H:i' }}">{{ item.created_at|timesince }} ago</span>
+                  {% if item.kind == "note" %}{% if item.author_id == request.user.pk or not item.author or request.user.is_superuser %}
+                    <form method="post" class="inline-form">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="delete_note">
+                      <input type="hidden" name="note" value="{{ item.pk }}">
+                      <button type="submit" class="icon-button sm danger" title="Delete note" data-confirm="Delete this note?"><span class="icon">delete</span></button>
+                    </form>
+                  {% endif %}{% endif %}
+                </div>
+                <div class="{% if item.kind == 'note' %}note-text{% else %}muted{% endif %}">{{ item.text|linebreaksbr }}</div>
+              </div>
+            </li>
+          {% endfor %}
+          <li class="timeline-item kind-created">
+            <span class="timeline-icon"><span class="icon">mark_email_unread</span></span>
+            <div class="timeline-body">
+              <div class="timeline-meta"><strong>Website</strong><span class="muted small">{{ lead.created_at|timesince }} ago</span></div>
+              <div class="muted">Lead submitted through the contact form{% if lead.page_url %} on <code>{{ lead.page_url }}</code>{% endif %}.</div>
+            </div>
+          </li>
+        </ol>
+      </section>
+    </div>
+
+    <aside class="edit-side">
+      <section class="card">
+        <div class="card-header"><h2><span class="icon">person</span>Contact</h2></div>
+        <dl class="details">
+          <div><dt>Email</dt><dd><a class="link" href="mailto:{{ lead.email }}">{{ lead.email }}</a></dd></div>
+          {% if lead.phone %}<div><dt>Phone</dt><dd><a class="link" href="tel:{{ lead.phone|cut:' ' }}">{{ lead.phone }}</a></dd></div>{% endif %}
+          {% if lead.company %}<div><dt>Company</dt><dd>{{ lead.company }}</dd></div>{% endif %}
+          <div><dt>Service</dt><dd>{{ lead.service|default:"—" }}</dd></div>
+          <div><dt>Budget</dt><dd>{{ lead.budget|default:"—" }}</dd></div>
+        </dl>
+        <div class="card-footer quick-actions">
+          <a class="button button-secondary button-sm" href="mailto:{{ lead.email }}"><span class="icon">mail</span> Email</a>
+          {% if lead.phone %}<a class="button button-secondary button-sm" href="tel:{{ lead.phone|cut:' ' }}"><span class="icon">call</span> Call</a>{% endif %}
+          {% if lead.whatsapp_number %}<a class="button button-secondary button-sm" href="https://wa.me/{{ lead.whatsapp_number }}" target="_blank" rel="noopener"><span class="icon">chat</span> WhatsApp</a>{% endif %}
+        </div>
+      </section>
+
+      {% if other_leads %}
+        <section class="card">
+          <div class="card-header"><h2><span class="icon">link</span>Earlier enquiries</h2></div>
+          <ul class="stat-list">
+            {% for other in other_leads %}
+              <li><a href="{{ other.get_dashboard_url }}"><span>{{ other.created_at|date:"M j, Y" }}</span><span class="badge badge-{{ other.status }}">{{ other.get_status_display }}</span><span class="icon chevron">chevron_right</span></a></li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+
+      <section class="card meta-card">
+        {% if lead.page_url %}<div><span class="muted small">Sent from</span><span>{{ lead.page_url }}</span></div>{% endif %}
+        {% if lead.ip_address %}<div><span class="muted small">IP address</span><span>{{ lead.ip_address }}</span></div>{% endif %}
+        <div><span class="muted small">Last updated</span><span>{{ lead.updated_at|date:"M j, Y H:i" }}</span></div>
+        <a class="link-danger" href="{% url 'dashboard:leads_delete' lead.pk %}"><span class="icon">delete</span> Delete this lead</a>
+      </section>
+    </aside>
+  </div>
+{% endblock %}

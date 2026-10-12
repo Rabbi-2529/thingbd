@@ -1,0 +1,19 @@
+<div class="image-input" data-image-input>
+  <div class="image-preview{% if not widget.is_initial %} empty{% endif %}">
+    {% if widget.is_initial %}<img src="{{ widget.value.url }}" alt="">{% endif %}
+    <span class="icon placeholder-icon">image</span>
+  </div>
+  <div class="image-controls">
+    <label class="button button-secondary button-sm">
+      <span class="icon">upload</span> {% if widget.is_initial %}Replace{% else %}Upload{% endif %}
+      <input type="{{ widget.type }}" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %} hidden>
+    </label>
+    {% if widget.is_initial and not widget.required %}
+      <label class="remove-check">
+        <input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}"{% if widget.attrs.disabled %} disabled{% endif %}>
+        Remove
+      </label>
+    {% endif %}
+    <span class="file-name">{% if widget.is_initial %}{{ widget.value.name|cut:"site/" }}{% else %}PNG, JPG, SVG or WebP{% endif %}</span>
+  </div>
+</div>

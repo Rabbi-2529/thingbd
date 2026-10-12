@@ -1,0 +1,31 @@
+{% extends "website/base.html" %}
+
+{% block content %}
+  <section class="section page-hero">
+    <a class="back" href="{% url 'home' %}#services">← All services</a>
+    <div class="eyebrow">Service</div>
+    <h1 class="page-title">{{ service.title }}</h1>
+    <p class="lead">{{ service.short_description }}</p>
+    {% if service.image %}<img class="feature-image" src="{{ service.image.url }}" alt="{{ service.title }}">{% endif %}
+  </section>
+
+  {% if service.body %}<section class="section narrow prose tight-top">{{ service.body|safe }}</section>{% endif %}
+
+  {% if projects %}
+    <section class="section">
+      <div class="section-head"><div><div class="eyebrow">Related work</div><h2>Projects we delivered.</h2></div></div>
+      {% include "website/partials/project_grid.html" %}
+    </section>
+  {% endif %}
+
+  {% if other_services %}
+    <section class="section">
+      <div class="section-head"><div><div class="eyebrow">Explore more</div><h2>Other services.</h2></div></div>
+      <div class="cards">
+        {% for s in other_services %}<a class="card" href="{{ s.get_absolute_url }}"><h3>{{ s.title }}</h3><p>{{ s.short_description }}</p></a>{% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% include "website/partials/cta.html" %}
+{% endblock %}

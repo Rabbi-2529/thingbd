@@ -1,0 +1,88 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# IDE and editors
+.idea/
+.vscode/
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Production builds
+/build
+dist/
+dist
+
+# Environment files (comprehensive coverage)
+
+*token.json*
+*credentials.json*
+
+# Logs and debug files
+dump.rdb
+
+# System files
+.DS_Store
+*.pem
+
+# Python
+__pycache__/
+*pyc*
+venv/
+.venv/
+
+# Development tools
+chainlit.md
+.chainlit
+.ipynb_checkpoints/
+.ac
+
+# Deployment
+.vercel
+
+# Data and databases
+agenthub/agents/youtube/db
+db.sqlite3
+
+# Archive files and large assets
+**/*.zip
+**/*.tar.gz
+**/*.tar
+**/*.tgz
+*.pack
+*.deb
+*.dylib
+
+# Build caches
+.cache/
+
+memory/test_credentials.md
+
+# Environment and credential files
+.env
+.env.*
+*.env
+credentials.json
+*.pem
+*.key
+.credentials
+
+# Django uploads and collected static
+media/
+staticfiles/
+
+# Local tooling and secrets
+.claude/
+memory/
+*.sqlite3
+*.sqlite3-journal
+!.env.example
+
+# Leftovers from the original Emergent scaffold (kept locally, not in the repo)
+/.gitconfig
+/test_result.md

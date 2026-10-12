@@ -1,0 +1,13 @@
+{% extends "website/base.html" %}
+
+{% block content %}
+  <section class="section page-hero">
+    <div class="eyebrow">Portfolio</div>
+    <h1 class="page-title">Built for real business.</h1>
+    <p class="lead">A selection of products, platforms and brands we have shipped.</p>
+  </section>
+  <section class="section tight-top">
+    {% if projects %}{% include "website/partials/project_grid.html" %}{% else %}<p>Projects are coming soon.</p>{% endif %}
+  </section>
+  {% include "website/partials/cta.html" %}
+{% endblock %}

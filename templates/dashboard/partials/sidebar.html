@@ -1,0 +1,33 @@
+<aside class="sidebar" id="sidebar">
+  <a class="sidebar-brand" href="{% url 'dashboard:index' %}">
+    {% if site.logo %}
+      <img src="{{ site.logo.url }}" alt="{{ site.site_name }}">
+    {% else %}
+      <span class="brand-mark">{{ site.site_name|first }}</span>
+      <span class="brand-text"><strong>{{ site.site_name }}</strong><small>Dashboard</small></span>
+    {% endif %}
+  </a>
+
+  <nav class="sidebar-nav" aria-label="Dashboard">
+    {% for group in navigation %}
+      <div class="nav-group">
+        <div class="nav-group-title">{{ group.title }}</div>
+        {% for item in group.items %}
+          {% if item.url %}
+            <a href="{{ item.url }}" class="nav-link{% if item.active %} active{% endif %}"{% if item.active %} aria-current="page"{% endif %}>
+              <span class="icon">{{ item.icon }}</span><span>{{ item.label }}</span>{% if item.badge_count %}<span class="nav-badge" title="{{ item.badge_count }} new">{{ item.badge_count }}</span>{% endif %}
+            </a>
+          {% else %}
+            <span class="nav-link disabled" title="Coming in a later phase">
+              <span class="icon">{{ item.icon }}</span><span>{{ item.label }}</span><span class="soon">Soon</span>
+            </span>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </nav>
+
+  <a class="sidebar-site-link" href="{% url 'home' %}" target="_blank" rel="noopener">
+    <span class="icon">open_in_new</span><span>View website</span>
+  </a>
+</aside>

@@ -1,0 +1,5 @@
+<ol class="steps">
+  {% for step in steps %}
+    <li><span>{{ forloop.counter|stringformat:"02d" }}</span><div><h3>{{ step.title }}</h3><p>{{ step.description }}</p></div></li>
+  {% endfor %}
+</ol>

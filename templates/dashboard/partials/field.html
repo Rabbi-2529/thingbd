@@ -1,0 +1,24 @@
+{% with wt=field.widget_type %}
+<div class="field{% if field.errors %} has-error{% endif %}{% if wt == 'checkbox' %} field-switch{% endif %}{% if wt == 'richtext' or wt == 'textarea' or wt == 'image' or wt == 'checkboxselectmultiple' %} field-wide{% endif %}">
+  {% if wt == "checkbox" %}
+    <label class="switch-row" for="{{ field.id_for_label }}">
+      {{ field }}
+      <span class="switch-label">{{ field.label }}</span>
+    </label>
+  {% elif wt == "checkboxselectmultiple" %}
+    <span class="field-label">{{ field.label }}</span>
+    <div class="choice-grid">
+      {% for option in field %}
+        <label class="choice-chip">{{ option.tag }}<span>{{ option.choice_label }}</span></label>
+      {% empty %}
+        <p class="help">Nothing to choose from yet.</p>
+      {% endfor %}
+    </div>
+  {% else %}
+    <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="required">*</span>{% endif %}</label>
+    {{ field }}
+  {% endif %}
+  {% if field.help_text %}<p class="help">{{ field.help_text|safe }}</p>{% endif %}
+  {% for error in field.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+</div>
+{% endwith %}

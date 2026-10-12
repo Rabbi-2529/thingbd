@@ -1,0 +1,39 @@
+{% extends "website/base.html" %}
+
+{% block content %}
+  <section class="section page-hero">
+    <div class="eyebrow">Insights</div>
+    <h1 class="page-title">{% if category %}{{ category.name }}{% else %}Blog{% endif %}</h1>
+    <p class="lead">Notes on software, automation, SEO and growing a business online.</p>
+    {% if categories %}
+      <div class="chips">
+        <a href="{% url 'post_list' %}" class="{% if not category %}active{% endif %}">All</a>
+        {% for c in categories %}<a href="{% url 'post_category' c.slug %}" class="{% if category == c %}active{% endif %}">{{ c.name }}</a>{% endfor %}
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="section tight-top">
+    {% if page_obj %}
+      <div class="posts">
+        {% for post in page_obj %}
+          <a class="post-card" href="{{ post.get_absolute_url }}">
+            {% if post.cover_image %}<img src="{{ post.cover_image.url }}" alt="" loading="lazy">{% else %}<div class="post-placeholder">{{ post.category.name|default:site.site_name }}</div>{% endif %}
+            <div class="post-meta">{{ post.published_at|date:"M j, Y" }}{% if post.category %} · {{ post.category.name }}{% endif %}</div>
+            <h3>{{ post.title }}</h3>
+            {% if post.excerpt %}<p>{{ post.excerpt }}</p>{% endif %}
+          </a>
+        {% endfor %}
+      </div>
+      {% if page_obj.has_other_pages %}
+        <nav class="pagination" aria-label="Pagination">
+          {% if page_obj.has_previous %}<a class="button ghost small" href="?page={{ page_obj.previous_page_number }}">← Newer</a>{% endif %}
+          <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+          {% if page_obj.has_next %}<a class="button ghost small" href="?page={{ page_obj.next_page_number }}">Older →</a>{% endif %}
+        </nav>
+      {% endif %}
+    {% else %}
+      <p>No posts yet. Check back soon.</p>
+    {% endif %}
+  </section>
+{% endblock %}

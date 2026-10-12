@@ -1,0 +1,35 @@
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      {% include "website/partials/brand.html" %}
+      <p class="tagline">{{ site.tagline }}</p>
+      {% if site.footer_text %}<p>{{ site.footer_text }}</p>{% endif %}
+    </div>
+    <div>
+      <h4>Company</h4>
+      <a href="{% url 'about' %}">About</a>
+      <a href="{% url 'project_list' %}">Work</a>
+      <a href="{% url 'post_list' %}">Blog</a>
+      {% for page in footer_pages %}<a href="{{ page.get_absolute_url }}">{{ page.title }}</a>{% endfor %}
+    </div>
+    <div>
+      <h4>Contact</h4>
+      {% if site.email %}<a href="mailto:{{ site.email }}">{{ site.email }}</a>{% endif %}
+      {% if site.phone %}<a href="tel:{{ site.phone|cut:' ' }}">{{ site.phone }}</a>{% endif %}
+      {% if site.whatsapp %}<a href="https://wa.me/{{ site.whatsapp|cut:'+'|cut:' ' }}" target="_blank" rel="noopener">WhatsApp</a>{% endif %}
+      {% if site.address %}<span>{{ site.address }}</span>{% endif %}
+    </div>
+    {% if site.facebook_url or site.linkedin_url or site.instagram_url or site.x_url or site.youtube_url or site.github_url %}
+    <div>
+      <h4>Follow</h4>
+      {% if site.facebook_url %}<a href="{{ site.facebook_url }}" target="_blank" rel="noopener">Facebook</a>{% endif %}
+      {% if site.linkedin_url %}<a href="{{ site.linkedin_url }}" target="_blank" rel="noopener">LinkedIn</a>{% endif %}
+      {% if site.instagram_url %}<a href="{{ site.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
+      {% if site.x_url %}<a href="{{ site.x_url }}" target="_blank" rel="noopener">X</a>{% endif %}
+      {% if site.youtube_url %}<a href="{{ site.youtube_url }}" target="_blank" rel="noopener">YouTube</a>{% endif %}
+      {% if site.github_url %}<a href="{{ site.github_url }}" target="_blank" rel="noopener">GitHub</a>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+  <p class="copyright">© {% now "Y" %} {{ site.site_name }}. All rights reserved.</p>
+</footer>

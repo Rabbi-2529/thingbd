@@ -1,0 +1,44 @@
+{% extends "dashboard/base.html" %}
+
+{% block subheading %}<p class="muted">Headlines, buttons and section titles on the home page. Lists like services and FAQs are managed on their own screens.</p>{% endblock %}
+{% block actions %}
+  <a class="button button-secondary" href="{% url 'home' %}" target="_blank" rel="noopener"><span class="icon">open_in_new</span> View home page</a>
+{% endblock %}
+
+{% block content %}
+  <div class="edit-layout">
+    <form method="post" enctype="multipart/form-data" class="card form-card" novalidate data-unsaved-warning>
+      {% csrf_token %}
+      <div class="tabs" role="tablist" data-tabs>
+        {% for fs in form.get_fieldsets %}
+          <button type="button" role="tab" class="tab{% if forloop.first %} active{% endif %}" data-tab="{{ fs.slug }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+            <span class="icon">{{ fs.icon }}</span>{{ fs.title }}
+            {% for f in fs.fields %}{% if f.errors %}<span class="tab-error" title="Has errors"></span>{% endif %}{% endfor %}
+          </button>
+        {% endfor %}
+      </div>
+      {% for fs in form.get_fieldsets %}
+        <div class="tab-panel{% if forloop.first %} active{% endif %}" id="{{ fs.slug }}" role="tabpanel">
+          <div class="form-grid">
+            {% for field in fs.fields %}{% include "dashboard/partials/field.html" %}{% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+      <div class="form-actions">
+        <button type="submit" class="button button-primary"><span class="icon">save</span> Save home page</button>
+      </div>
+    </form>
+
+    <aside class="edit-side">
+      <section class="card">
+        <div class="card-header"><h2><span class="icon">widgets</span>Home page sections</h2></div>
+        <ul class="stat-list">
+          {% for label, icon, url, count in related %}
+            <li><a href="{{ url }}"><span class="icon">{{ icon }}</span><span>{{ label }}</span><strong>{{ count }}</strong><span class="icon chevron">chevron_right</span></a></li>
+          {% endfor %}
+        </ul>
+        <div class="card-footer muted small">Counts show items currently visible on the website.</div>
+      </section>
+    </aside>
+  </div>
+{% endblock %}

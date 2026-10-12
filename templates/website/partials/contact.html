@@ -1,0 +1,39 @@
+<section class="section contact" id="contact">
+  <div>
+    <div class="eyebrow">{{ site.contact_eyebrow }}</div>
+    <h2>{{ site.contact_title }}{% if site.contact_highlight %}<br><span>{{ site.contact_highlight }}</span>{% endif %}</h2>
+    {% if site.contact_text %}<p>{{ site.contact_text }}</p>{% endif %}
+    <ul class="contact-info">
+      {% if site.email %}<li><span>Email</span><a href="mailto:{{ site.email }}">{{ site.email }}</a></li>{% endif %}
+      {% if site.phone %}<li><span>Phone</span><a href="tel:{{ site.phone|cut:' ' }}">{{ site.phone }}</a></li>{% endif %}
+      {% if site.address %}<li><span>Office</span>{{ site.address }}</li>{% endif %}
+    </ul>
+  </div>
+  <form id="lead-form" method="post" action="{% url 'contact_submit' %}">
+    {% csrf_token %}
+    <label>Name<input name="name" maxlength="120" required></label>
+    <label>Email<input name="email" type="email" required></label>
+    <label>Phone<input name="phone" maxlength="40"></label>
+    <label>Company<input name="company" maxlength="120"></label>
+    <label>Service
+      <select name="service">
+        <option value="">Select a service</option>
+        {% for service in service_choices %}<option>{{ service.title }}</option>{% endfor %}
+        <option>Other</option>
+      </select>
+    </label>
+    <label>Budget
+      <select name="budget">
+        <option value="">Select a range</option>
+        <option>Under ৳50k</option>
+        <option>৳50k – ৳2 lakh</option>
+        <option>৳2 – ৳5 lakh</option>
+        <option>৳5 lakh+</option>
+      </select>
+    </label>
+    <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
+    <label class="full">Message<textarea name="message" maxlength="4000" rows="5" required></textarea></label>
+    <button class="button full" type="submit">Send project details</button>
+    <p class="form-status full{% for m in messages %} {{ m.tags }}{% endfor %}" role="status">{% for m in messages %}{{ m }}{% endfor %}</p>
+  </form>
+</section>

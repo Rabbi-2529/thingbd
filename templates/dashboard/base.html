@@ -1,0 +1,45 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}{{ page_title }}{% endblock %} · {{ site.site_name }} Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=swap">
+  <link rel="stylesheet" href="{% static 'dashboard/css/dashboard.css' %}">
+  {% block extra_head %}{% endblock %}
+  <script>
+    try { const t = localStorage.getItem("dash-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+{% block body %}
+  <div class="layout">
+    {% include "dashboard/partials/sidebar.html" %}
+    <div class="sidebar-backdrop" data-sidebar-close></div>
+
+    <div class="main">
+      {% include "dashboard/partials/topbar.html" %}
+
+      <main class="content">
+        {% include "dashboard/partials/messages.html" %}
+        <div class="page-header">
+          <div>
+            {% block breadcrumbs %}{% endblock %}
+            <h1>{% block heading %}{{ page_title }}{% endblock %}</h1>
+            {% block subheading %}{% endblock %}
+          </div>
+          <div class="page-actions">{% block actions %}{% endblock %}</div>
+        </div>
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+{% endblock %}
+  {% block extra_js %}{% endblock %}
+  <script src="{% static 'dashboard/js/dashboard.js' %}"></script>
+</body>
+</html>

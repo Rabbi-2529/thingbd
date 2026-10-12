@@ -1,0 +1,34 @@
+{% with formset=fs.formset %}
+<section class="card form-section" data-formset="{{ fs.prefix }}">
+  <div class="card-header">
+    <h2><span class="icon">photo_library</span>{{ fs.title }}</h2>
+    <button type="button" class="button button-secondary button-sm" data-formset-add><span class="icon">add_photo_alternate</span> Add image</button>
+  </div>
+  {{ formset.management_form }}
+  {% for e in formset.non_form_errors %}<p class="error-text form-body">{{ e }}</p>{% endfor %}
+  <div class="gallery-grid" data-formset-list>
+    {% for gform in formset %}
+      <div class="gallery-item{% if gform.errors %} has-error{% endif %}">
+        {% for hidden in gform.hidden_fields %}{{ hidden }}{% endfor %}
+        {% include "dashboard/partials/field.html" with field=gform.image %}
+        {% include "dashboard/partials/field.html" with field=gform.caption %}
+        <div class="gallery-item-foot">
+          <label class="order-input">Order {{ gform.order }}</label>
+          {% if gform.instance.pk %}<label class="remove-check">{{ gform.DELETE }} Remove</label>{% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  <p class="gallery-empty muted small"{% if formset.forms %} hidden{% endif %}>No gallery images yet.</p>
+  <template data-formset-template>
+    <div class="gallery-item">
+      {% with gform=formset.empty_form %}
+        {% for hidden in gform.hidden_fields %}{{ hidden }}{% endfor %}
+        {% include "dashboard/partials/field.html" with field=gform.image %}
+        {% include "dashboard/partials/field.html" with field=gform.caption %}
+        <div class="gallery-item-foot"><label class="order-input">Order {{ gform.order }}</label></div>
+      {% endwith %}
+    </div>
+  </template>
+</section>
+{% endwith %}

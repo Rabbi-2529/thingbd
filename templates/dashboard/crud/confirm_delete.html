@@ -1,0 +1,28 @@
+{% extends "dashboard/base.html" %}
+
+{% block breadcrumbs %}
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="{% url 'dashboard:index' %}">Dashboard</a>
+    <span class="icon">chevron_right</span>
+    <a href="{{ list_url }}">{{ vs.title }}</a>
+  </nav>
+{% endblock %}
+
+{% block content %}
+  <form method="post" class="card form-card narrow">
+    {% csrf_token %}
+    <div class="form-body danger-zone">
+      <span class="danger-icon"><span class="icon">delete_forever</span></span>
+      <div>
+        <h2>Delete “{{ object }}”?</h2>
+        <p class="muted">This {{ vs.noun }} will be removed from the website and the dashboard. This cannot be undone.</p>
+        {% if vs.delete_note %}<p class="muted">{{ vs.delete_note }}</p>{% endif %}
+        {% if vs.active_field %}<p class="muted small">Tip: to take it off the website temporarily, switch it to <strong>{{ vs.active_labels.1|lower }}</strong> instead.</p>{% endif %}
+      </div>
+    </div>
+    <div class="form-actions">
+      <a class="button button-ghost" href="{{ edit_url }}">Cancel</a>
+      <button type="submit" class="button button-danger"><span class="icon">delete</span> Yes, delete</button>
+    </div>
+  </form>
+{% endblock %}

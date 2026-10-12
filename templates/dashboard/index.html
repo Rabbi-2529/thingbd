@@ -1,0 +1,81 @@
+{% extends "dashboard/base.html" %}
+
+{% block heading %}Welcome back{% if request.user.first_name %}, {{ request.user.first_name }}{% endif %}{% endblock %}
+{% block subheading %}<p class="muted">Here is what is happening on {{ site.site_name }} today.</p>{% endblock %}
+{% block actions %}
+  <a class="button button-secondary" href="{% url 'home' %}" target="_blank" rel="noopener"><span class="icon">open_in_new</span> View website</a>
+  <a class="button button-primary" href="{% url 'dashboard:site_settings' %}"><span class="icon">tune</span> Site settings</a>
+{% endblock %}
+
+{% block content %}
+  <div class="kpi-grid">
+    {% for kpi in kpis %}
+      <div class="card kpi">
+        <span class="kpi-icon tone-{{ kpi.tone }}"><span class="icon">{{ kpi.icon }}</span></span>
+        <div>
+          <div class="kpi-label">{{ kpi.label }}</div>
+          <div class="kpi-value">{{ kpi.value }}</div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="grid-2-1">
+    <section class="card">
+      <div class="card-header">
+        <h2>Recent leads</h2>
+        <a class="link small" href="{% url 'dashboard:leads_list' %}">View all</a>
+      </div>
+      {% if recent_leads %}
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Name</th><th>Service</th><th>Status</th><th>Received</th></tr></thead>
+            <tbody>
+              {% for lead in recent_leads %}
+                <tr>
+                  <td><a class="row-title" href="{{ lead.get_dashboard_url }}">{{ lead.name }}</a><div class="muted small">{{ lead.email }}</div></td>
+                  <td>{{ lead.service|default:"—" }}</td>
+                  <td><span class="badge badge-{{ lead.status }}">{{ lead.get_status_display }}</span></td>
+                  <td class="muted">{{ lead.created_at|timesince }} ago</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <span class="icon">inbox</span>
+          <p><strong>No leads yet</strong></p>
+          <p class="muted">Contact form submissions from the website will appear here.</p>
+        </div>
+      {% endif %}
+    </section>
+
+    <div class="stack">
+    <section class="card">
+      <div class="card-header"><h2>Lead pipeline</h2></div>
+      <ul class="pipeline-summary">
+        {% for stage in pipeline %}
+          <li>
+            <a href="{% url 'dashboard:leads_list' %}?lead_status={{ stage.value }}">
+              <span class="badge badge-{{ stage.value }}">{{ stage.label }}</span>
+              <strong>{{ stage.count }}</strong>
+            </a>
+            <span class="bar"><span class="bar-fill bar-{{ stage.value }}" style="width: {{ stage.pct }}%"></span></span>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h2>Website content</h2></div>
+      <ul class="stat-list">
+        {% for label, count, icon, url in content_counts %}
+          <li>{% if url %}<a href="{{ url }}">{% else %}<span class="stat-row">{% endif %}<span class="icon">{{ icon }}</span><span>{{ label }}</span><strong>{{ count }}</strong>{% if url %}<span class="icon chevron">chevron_right</span></a>{% else %}</span>{% endif %}</li>
+        {% endfor %}
+      </ul>
+      <div class="card-footer"><a class="button button-secondary button-sm" href="{% url 'dashboard:home_page' %}"><span class="icon">home</span> Edit home page</a></div>
+    </section>
+    </div>
+  </div>
+{% endblock %}

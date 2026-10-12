@@ -1,0 +1,75 @@
+{% extends "dashboard/base.html" %}
+
+{% block breadcrumbs %}
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="{% url 'dashboard:index' %}">Dashboard</a>
+    <span class="icon">chevron_right</span>
+    <a href="{{ list_url }}">{{ vs.title }}</a>
+  </nav>
+{% endblock %}
+{% block heading %}{% if object %}{{ object }}{% else %}{{ page_title }}{% endif %}{% endblock %}
+{% block actions %}
+  {% if site_url %}<a class="button button-secondary" href="{{ site_url }}" target="_blank" rel="noopener"><span class="icon">open_in_new</span> {{ vs.site_link_label }}</a>{% endif %}
+{% endblock %}
+
+{% block extra_head %}
+  {% if has_richtext %}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">{% endif %}
+{% endblock %}
+
+{% block content %}
+  <form method="post" enctype="multipart/form-data" novalidate data-unsaved-warning data-seo-path="{{ vs.public_path }}">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-error"><span class="icon">error</span><div>{% for e in form.non_field_errors %}{{ e }} {% endfor %}</div></div>
+    {% endif %}
+
+    <div class="edit-layout{% if not form.side_sections %} single{% endif %}">
+      <div class="edit-main">
+        {% for section in form.main_sections %}
+          <section class="card form-section">
+            <div class="card-header"><h2><span class="icon">{{ section.icon }}</span>{{ section.title }}</h2></div>
+            <div class="form-body form-grid">
+              {% for field in section.fields %}{% include "dashboard/partials/field.html" %}{% endfor %}
+            </div>
+          </section>
+        {% endfor %}
+
+        {% for fs in formsets %}
+          {% include "dashboard/partials/gallery_formset.html" %}
+        {% endfor %}
+      </div>
+
+      {% if form.side_sections %}
+        <aside class="edit-side">
+          {% for section in form.side_sections %}
+            <section class="card form-section">
+              <div class="card-header"><h2><span class="icon">{{ section.icon }}</span>{{ section.title }}</h2></div>
+              <div class="form-body form-stack">
+                {% for field in section.fields %}{% include "dashboard/partials/field.html" %}{% endfor %}
+              </div>
+            </section>
+          {% endfor %}
+          {% if object %}
+            <section class="card meta-card">
+              {% if object.created_at %}<div><span class="muted small">Created</span><span>{{ object.created_at|date:"M j, Y H:i" }}</span></div>{% endif %}
+              {% if object.updated_at %}<div><span class="muted small">Last saved</span><span>{{ object.updated_at|date:"M j, Y H:i" }}</span></div>{% endif %}
+              <a class="link-danger" href="{{ delete_url }}"><span class="icon">delete</span> Delete this {{ vs.noun }}</a>
+            </section>
+          {% endif %}
+        </aside>
+      {% endif %}
+    </div>
+
+    <div class="sticky-actions">
+      <a class="button button-ghost" href="{{ list_url }}">Cancel</a>
+      <span class="spacer"></span>
+      {% if not object %}<button type="submit" name="_addanother" class="button button-secondary">Save &amp; add another</button>{% endif %}
+      <button type="submit" name="_continue" class="button button-secondary">Save &amp; keep editing</button>
+      <button type="submit" class="button button-primary"><span class="icon">save</span> Save</button>
+    </div>
+  </form>
+{% endblock %}
+
+{% block extra_js %}
+  {% if has_richtext %}<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>{% endif %}
+{% endblock %}

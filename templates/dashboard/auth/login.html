@@ -1,0 +1,39 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Log in{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block body %}
+  <div class="auth">
+    <section class="auth-art" aria-hidden="true">
+      <div class="auth-art-inner">
+        <span class="brand-mark lg">{{ site.site_name|first }}</span>
+        <h2>{{ site.tagline|lower|capfirst }}</h2>
+        <p>Manage pages, services, portfolio, blog and leads for {{ site.site_name }} from one place.</p>
+      </div>
+    </section>
+
+    <section class="auth-panel">
+      <div class="auth-card">
+        <a class="sidebar-brand auth-brand" href="{% url 'home' %}">
+          <span class="brand-mark">{{ site.site_name|first }}</span>
+          <span class="brand-text"><strong>{{ site.site_name }}</strong><small>Dashboard</small></span>
+        </a>
+        <h1>Welcome back</h1>
+        <p class="muted">Sign in to manage your website.</p>
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-error"><span class="icon">error</span><div>{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div></div>
+        {% endif %}
+
+        <form method="post" class="form-stack" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ next }}">
+          {% include "dashboard/partials/field.html" with field=form.username %}
+          {% include "dashboard/partials/field.html" with field=form.password %}
+          <button class="button button-primary button-block" type="submit">Sign in <span class="icon">arrow_forward</span></button>
+        </form>
+        <a class="back-link" href="{% url 'home' %}"><span class="icon">arrow_back</span> Back to website</a>
+      </div>
+    </section>
+  </div>
+{% endblock %}

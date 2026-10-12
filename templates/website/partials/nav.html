@@ -1,0 +1,12 @@
+<header class="nav">
+  {% include "website/partials/brand.html" %}
+  <button class="menu-button" type="button" aria-expanded="false" aria-controls="nav-links">Menu</button>
+  <nav id="nav-links">
+    <a href="{% url 'home' %}#services">Services</a>
+    <a href="{% url 'project_list' %}">Work</a>
+    <a href="{% url 'about' %}">About</a>
+    <a href="{% url 'post_list' %}">Blog</a>
+    {% for page in header_pages %}<a href="{{ page.get_absolute_url }}">{{ page.title }}</a>{% endfor %}
+    <a href="{% url 'home' %}#contact" class="button small">Start a project</a>
+  </nav>
+</header>

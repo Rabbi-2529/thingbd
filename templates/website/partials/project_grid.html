@@ -1,0 +1,13 @@
+<div class="work-grid">
+  {% for project in projects %}
+    <a class="project" href="{{ project.get_absolute_url }}">
+      {% if project.cover_image %}
+        <img class="project-cover" src="{{ project.cover_image.url }}" alt="{{ project.title }}" loading="lazy">
+      {% else %}
+        <div class="project-art{% if forloop.counter|divisibleby:2 %} alternate{% endif %}">{{ project.cover_text|default:project.title|linebreaksbr }}</div>
+      {% endif %}
+      <h3>{{ project.title }}</h3>
+      {% if project.category %}<p>{{ project.category }}</p>{% endif %}
+    </a>
+  {% endfor %}
+</div>

@@ -1,0 +1,9 @@
+{% extends "website/base.html" %}
+
+{% block content %}
+  <section class="section narrow page-hero">
+    <h1 class="page-title">{{ page.title }}</h1>
+    <p class="muted-small">Last updated {{ page.updated_at|date:"F j, Y" }}</p>
+  </section>
+  <section class="section narrow prose tight-top">{{ page.body|safe }}</section>
+{% endblock %}

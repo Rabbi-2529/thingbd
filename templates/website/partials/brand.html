@@ -1,0 +1,8 @@
+<a class="brand" href="{% url 'home' %}" aria-label="{{ site.site_name }} home">
+  {% if site.logo %}
+    <img src="{{ site.logo.url }}" alt="{{ site.site_name }}" class="brand-logo">
+  {% else %}
+    <span class="brand-mark">{{ site.site_name|first }}</span>
+    {% if site.site_name|slice:"-2:" == "bd" %}<span>{{ site.site_name|slice:":-2" }}<span>bd</span></span>{% else %}<span>{{ site.site_name }}</span>{% endif %}
+  {% endif %}
+</a>

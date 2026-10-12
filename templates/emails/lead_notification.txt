@@ -1,0 +1,16 @@
+{% autoescape off %}New lead from the {{ site.site_name }} website
+
+Name:    {{ lead.name }}
+Email:   {{ lead.email }}{% if lead.phone %}
+Phone:   {{ lead.phone }}{% endif %}{% if lead.company %}
+Company: {{ lead.company }}{% endif %}{% if lead.service %}
+Service: {{ lead.service }}{% endif %}{% if lead.budget %}
+Budget:  {{ lead.budget }}{% endif %}
+
+Message:
+{{ lead.message }}
+
+Open in dashboard: {{ dashboard_url }}
+
+Reply to this email to answer {{ lead.name }} directly.
+{% endautoescape %}

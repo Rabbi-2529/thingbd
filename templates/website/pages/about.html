@@ -1,0 +1,36 @@
+{% extends "website/base.html" %}
+
+{% block content %}
+  <section class="section page-hero">
+    <div class="eyebrow">About us</div>
+    <h1 class="page-title">{{ site.tagline|title }}</h1>
+    {% if site.meta_description %}<p class="lead">{{ site.meta_description }}</p>{% endif %}
+    {% if stats %}<div class="stats">{% for stat in stats %}<div><strong>{{ stat.value }}</strong><span>{{ stat.label }}</span></div>{% endfor %}</div>{% endif %}
+  </section>
+
+  {% if team %}
+    <section class="section">
+      <div class="section-head"><div><div class="eyebrow">Team</div><h2>The people behind the code.</h2></div></div>
+      <div class="team">
+        {% for m in team %}
+          <article class="member">
+            {% if m.photo %}<img src="{{ m.photo.url }}" alt="{{ m.name }}">{% else %}<div class="member-placeholder">{{ m.name|first }}</div>{% endif %}
+            <h3>{{ m.name }}</h3>
+            <p class="role">{{ m.role }}</p>
+            {% if m.bio %}<p>{{ m.bio }}</p>{% endif %}
+            {% if m.linkedin_url %}<a href="{{ m.linkedin_url }}" target="_blank" rel="noopener">LinkedIn ↗</a>{% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% if steps %}
+    <section class="section split">
+      <div><div class="eyebrow">How we work</div><h2>From idea to impact.</h2></div>
+      {% include "website/partials/steps.html" %}
+    </section>
+  {% endif %}
+
+  {% include "website/partials/cta.html" %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{# SEO meta tags. `seo` comes from apps/core/seo.py (site defaults, or the page's own via the view). #}
+  <title>{{ seo.title }}</title>
+  {% if seo.description %}<meta name="description" content="{{ seo.description }}">{% endif %}
+  {% if seo.keywords %}<meta name="keywords" content="{{ seo.keywords|join:', ' }}">{% endif %}
+  <link rel="canonical" href="{{ seo.url }}">
+  <meta property="og:site_name" content="{{ seo.site_name }}">
+  <meta property="og:type" content="{{ seo.type }}">
+  <meta property="og:title" content="{{ seo.title }}">
+  {% if seo.description %}<meta property="og:description" content="{{ seo.description }}">{% endif %}
+  <meta property="og:url" content="{{ seo.url }}">
+  {% if seo.image %}<meta property="og:image" content="{{ seo.image }}">{% endif %}
+  <meta name="twitter:card" content="{% if seo.image %}summary_large_image{% else %}summary{% endif %}">
+  <meta name="twitter:title" content="{{ seo.title }}">
+  {% if seo.description %}<meta name="twitter:description" content="{{ seo.description }}">{% endif %}
+  {% if seo.image %}<meta name="twitter:image" content="{{ seo.image }}">{% endif %}

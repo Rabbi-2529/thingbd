@@ -1,0 +1,5 @@
+<div class="richtext" data-richtext data-upload-url="{% url 'dashboard:upload_image' %}">
+  <div class="richtext-editor" data-placeholder="Write here…"></div>
+  <textarea name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
+{% if widget.value %}{{ widget.value }}{% endif %}</textarea>
+</div>

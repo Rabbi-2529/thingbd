@@ -1,0 +1,21 @@
+{% extends "dashboard/base.html" %}
+
+{% block subheading %}<p class="muted">Your name and email as shown in the dashboard and on blog posts.</p>{% endblock %}
+
+{% block content %}
+  <form method="post" class="card form-card narrow" novalidate>
+    {% csrf_token %}
+    <div class="form-body">
+      <div class="profile-head">
+        <span class="avatar lg">{% firstof request.user.first_name|first request.user.username|first %}</span>
+        <div><strong>{{ request.user.username }}</strong><div class="muted small">{% if request.user.is_superuser %}Super admin{% else %}Staff{% endif %} · joined {{ request.user.date_joined|date:"M j, Y" }}</div></div>
+      </div>
+      <div class="form-grid">
+        {% for field in form %}{% include "dashboard/partials/field.html" %}{% endfor %}
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="button button-primary"><span class="icon">save</span> Save profile</button>
+    </div>
+  </form>
+{% endblock %}

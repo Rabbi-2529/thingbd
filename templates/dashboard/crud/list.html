@@ -1,0 +1,153 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block subheading %}{% if vs.description %}<p class="muted">{{ vs.description }}</p>{% endif %}{% endblock %}
+{% block actions %}
+  {% for label, icon, url in header_links %}
+    <a class="button button-secondary" href="{{ url }}"><span class="icon">{{ icon }}</span> {{ label }}</a>
+  {% endfor %}
+  {% if add_url %}<a class="button button-primary" href="{{ add_url }}"><span class="icon">add</span> Add {{ vs.noun }}</a>{% endif %}
+{% endblock %}
+
+{% block content %}
+  <section class="card">
+    <form class="toolbar" method="get" role="search">
+      <div class="search">
+        <span class="icon">search</span>
+        <input class="input" type="search" name="q" value="{{ q }}" placeholder="Search {{ vs.title|lower }}…" aria-label="Search">
+      </div>
+      {% if vs.active_field %}
+        {# keeps the current status when a dropdown submits; a clicked button's value comes later and wins #}
+        <input type="hidden" name="status" value="{{ status }}">
+        <div class="segmented" role="group" aria-label="Filter">
+          <button type="submit" name="status" value="" class="{% if not status %}active{% endif %}">All</button>
+          <button type="submit" name="status" value="on" class="{% if status == 'on' %}active{% endif %}">{{ vs.active_labels.0 }}</button>
+          <button type="submit" name="status" value="off" class="{% if status == 'off' %}active{% endif %}">{{ vs.active_labels.1 }}</button>
+        </div>
+      {% endif %}
+      {% for f in filters %}
+        <select class="select select-sm" name="{{ f.param }}" aria-label="{{ f.label }}" data-autosubmit>
+          <option value="">{{ f.label }}: all</option>
+          {% for value, label in f.choices %}
+            <option value="{{ value }}"{% if f.value == value|stringformat:"s" %} selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      {% endfor %}
+      {% if filtered %}<a class="button button-ghost button-sm" href="?"><span class="icon">close</span> Clear</a>{% endif %}
+      <span class="toolbar-count muted small">{{ paginator.count }} of {{ total }}</span>
+    </form>
+
+    {% if rows %}
+      <form method="post" action="{{ bulk_url }}" data-bulk-form>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ current_url }}">
+        <div class="bulk-bar" data-bulk-bar hidden>
+          <span><strong data-bulk-count>0</strong> selected</span>
+          {% if vs.active_field %}
+            <button class="button button-secondary button-sm" name="action" value="show"><span class="icon">visibility</span> {{ vs.active_labels.0 }}</button>
+            <button class="button button-secondary button-sm" name="action" value="hide"><span class="icon">visibility_off</span> {{ vs.active_labels.1 }}</button>
+          {% endif %}
+          {% for action in vs.bulk_actions %}
+            <button class="button button-secondary button-sm" name="action" value="{{ action.name }}"><span class="icon">{{ action.icon }}</span> {{ action.label }}</button>
+          {% endfor %}
+          <button class="button button-danger button-sm" name="action" value="delete" data-confirm="Delete the selected items? This cannot be undone."><span class="icon">delete</span> Delete</button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table crud-table">
+            <thead>
+              <tr>
+                <th class="col-check"><input type="checkbox" class="check" data-check-all aria-label="Select all"></th>
+                {% if can_drag %}<th class="col-drag" aria-label="Reorder"></th>{% endif %}
+                {% for col in vs.columns %}<th class="{% if col.kind == 'image' %}col-image{% elif not col.primary %}hide-sm{% endif %}">{{ col.label }}</th>{% endfor %}
+                {% if vs.active_field %}<th class="col-status">{{ vs.active_labels.0 }}</th>{% endif %}
+                <th class="col-actions" aria-label="Actions"></th>
+              </tr>
+            </thead>
+            <tbody{% if can_drag %} data-sortable data-reorder-url="{{ reorder_url }}"{% endif %}>
+              {% for row in rows %}
+                <tr data-id="{{ row.obj.pk }}">
+                  <td class="col-check"><input type="checkbox" class="check" name="ids" value="{{ row.obj.pk }}" data-check aria-label="Select {{ row.obj }}"></td>
+                  {% if can_drag %}<td class="col-drag"><span class="icon drag-handle" title="Drag to reorder">drag_indicator</span></td>{% endif %}
+                  {% for cell in row.cells %}
+                    {% with col=cell.col value=cell.value %}
+                      <td class="{% if col.kind == 'image' %}col-image{% elif not col.primary %}hide-sm{% endif %}">
+                        {% if col.kind == "image" %}
+                          {% if value %}<img class="thumb" src="{{ value }}" alt="">{% else %}<span class="thumb thumb-empty"><span class="icon">image</span></span>{% endif %}
+                        {% elif col.kind == "bool" %}
+                          {% if value %}<span class="icon bool-yes" title="Yes">check_circle</span>{% else %}<span class="icon bool-no" title="No">remove</span>{% endif %}
+                        {% elif col.kind == "rating" %}
+                          <span class="stars" aria-label="{{ value }} out of 5">{% for i in "12345" %}<span class="{% if forloop.counter <= value %}on{% endif %}">★</span>{% endfor %}</span>
+                        {% elif col.kind == "ago" %}
+                          <span class="muted small" title="{{ value|date:'M j, Y H:i' }}">{{ value|timesince }} ago</span>
+                        {% elif col.kind == "date" %}
+                          <span class="muted small" title="{{ value }}">{{ value|date:"M j, Y" }}</span>
+                        {% elif col.kind == "status" %}
+                          <span class="badge badge-{{ value.0 }}">{{ value.1 }}</span>
+                        {% elif col.kind == "badge" %}
+                          <span class="badge">{{ value }}</span>
+                        {% elif col.primary %}
+                          <a class="row-title" href="{{ row.edit_url }}">{{ value|default:"(untitled)" }}</a>
+                        {% elif col.kind == "muted" %}
+                          <span class="muted clamp">{{ value|default:"—" }}</span>
+                        {% else %}
+                          {{ value|default:"—" }}
+                        {% endif %}
+                      </td>
+                    {% endwith %}
+                  {% endfor %}
+                  {% if vs.active_field %}
+                    <td class="col-status">
+                      <button type="button" class="switch-button{% if row.active %} on{% endif %}" data-toggle-url="{{ row.toggle_url }}" role="switch" aria-checked="{% if row.active %}true{% else %}false{% endif %}" aria-label="{{ vs.active_labels.0 }}"></button>
+                    </td>
+                  {% endif %}
+                  <td class="col-actions">
+                    <div class="row-actions">
+                      {% if row.site_url %}<a class="icon-button sm hide-sm" href="{{ row.site_url }}" target="_blank" rel="noopener" title="{{ vs.site_link_label }}"><span class="icon">open_in_new</span></a>{% endif %}
+                      <a class="icon-button sm" href="{{ row.edit_url }}" title="Edit"><span class="icon">edit</span></a>
+                      <a class="icon-button sm danger" href="{{ row.delete_url }}" title="Delete"><span class="icon">delete</span></a>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </form>
+
+      {% if vs.sortable %}
+        <div class="card-footer muted small hide-sm">
+          {% if can_drag %}<span class="icon inline">drag_indicator</span> Drag rows to change the order on the website.{% else %}Clear the search and filter to reorder items.{% endif %}
+        </div>
+      {% endif %}
+
+      {% if is_paginated %}
+        <nav class="pager" aria-label="Pagination">
+          {% if page_obj.has_previous %}<a class="button button-secondary button-sm" href="?{{ page_query }}{% if page_query %}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+          <span class="muted small">Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
+          {% if page_obj.has_next %}<a class="button button-secondary button-sm" href="?{{ page_query }}{% if page_query %}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+        </nav>
+      {% endif %}
+    {% else %}
+      <div class="empty-state">
+        <span class="icon">{{ vs.icon }}</span>
+        {% if filtered %}
+          <p><strong>No matches</strong></p>
+          <p class="muted">Try a different search or <a class="link" href="?">clear the filters</a>.</p>
+        {% else %}
+          <p><strong>No {{ vs.title|lower }} yet</strong></p>
+          {% if add_url %}
+            <p class="muted">Add the first one to show it on the website.</p>
+            <a class="button button-primary" href="{{ add_url }}"><span class="icon">add</span> Add {{ vs.noun }}</a>
+          {% elif vs.empty_text %}
+            <p class="muted">{{ vs.empty_text }}</p>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}
+
+{% block extra_js %}
+  {% if can_drag %}<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>{% endif %}
+{% endblock %}

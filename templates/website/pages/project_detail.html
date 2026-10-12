@@ -1,0 +1,35 @@
+{% extends "website/base.html" %}
+
+{% block content %}
+  <section class="section page-hero">
+    <a class="back" href="{% url 'project_list' %}">← All work</a>
+    <div class="eyebrow">{% firstof project.category "Case study" %}</div>
+    <h1 class="page-title">{{ project.title }}</h1>
+    {% if project.summary %}<p class="lead">{{ project.summary }}</p>{% endif %}
+    <dl class="facts">
+      {% if project.client %}<div><dt>Client</dt><dd>{{ project.client }}</dd></div>{% endif %}
+      {% if project.services.all %}<div><dt>Services</dt><dd>{% for s in project.services.all %}<a href="{{ s.get_absolute_url }}">{{ s.title }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</dd></div>{% endif %}
+      {% if project.live_url %}<div><dt>Live</dt><dd><a href="{{ project.live_url }}" target="_blank" rel="noopener">Visit site ↗</a></dd></div>{% endif %}
+    </dl>
+    {% if project.cover_image %}<img class="feature-image" src="{{ project.cover_image.url }}" alt="{{ project.title }}">{% else %}<div class="project-art feature">{{ project.cover_text|default:project.title|linebreaksbr }}</div>{% endif %}
+  </section>
+
+  {% if project.body %}<section class="section narrow prose tight-top">{{ project.body|safe }}</section>{% endif %}
+
+  {% if project.tech_list %}
+    <section class="section narrow tight-top">
+      <div class="eyebrow">Tech stack</div>
+      <ul class="tags">{% for t in project.tech_list %}<li>{{ t }}</li>{% endfor %}</ul>
+    </section>
+  {% endif %}
+
+  {% if project.images.all %}
+    <section class="section tight-top">
+      <div class="gallery">
+        {% for img in project.images.all %}<figure><img src="{{ img.image.url }}" alt="{{ img.caption }}" loading="lazy">{% if img.caption %}<figcaption>{{ img.caption }}</figcaption>{% endif %}</figure>{% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% include "website/partials/cta.html" %}
+{% endblock %}

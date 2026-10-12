@@ -1,0 +1,9 @@
+{% extends "website/base.html" %}
+{% block content %}
+  <section class="section page-hero error-page">
+    <div class="eyebrow">Error 404</div>
+    <h1 class="page-title">This page wandered off.</h1>
+    <p class="lead">The page you are looking for does not exist or has moved.</p>
+    <div class="actions"><a class="button" href="{% url 'home' %}">Back to home</a></div>
+  </section>
+{% endblock %}
