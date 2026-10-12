@@ -230,11 +230,15 @@ systemctl enable nginx
 systemctl restart nginx
 
 # Firewall: keep SSH open, allow web traffic.
-SSH_PORT="$(sshd -T 2>/dev/null | awk '/^port /{print $2; exit}')"; SSH_PORT="${SSH_PORT:-22}"
-ufw allow "$SSH_PORT"/tcp >/dev/null
+# Collect SSH ports from sshd's config AND from what is actually listening (Ubuntu 24.04 uses
+# systemd socket activation, where `sshd -T` can fail). Port 22 is always kept open.
+SSH_PORTS="$( { sshd -T 2>/dev/null | awk '/^port /{print $2}' || true
+                ss -ltnpH 2>/dev/null | awk '/sshd|"systemd"/ {n=split($4,a,":"); print a[n]}' || true
+                echo 22; } | grep -E '^[0-9]+$' | sort -un | tr '\n' ' ')"
+for port in $SSH_PORTS; do ufw allow "$port"/tcp >/dev/null; done
 ufw allow 'Nginx Full' >/dev/null
 ufw --force enable >/dev/null
-echo "   firewall: SSH ($SSH_PORT), HTTP and HTTPS allowed"
+echo "   firewall on: SSH (port ${SSH_PORTS% }), HTTP and HTTPS allowed"
 
 # ---------------------------------------------------------------------------
 say "9/9 Daily backups (kept 14 days in $BACKUPS)"
