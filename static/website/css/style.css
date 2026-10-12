@@ -384,3 +384,12 @@ body.lightbox-open { overflow: hidden; }
 /* Safety net: very long words/URLs in rich text never widen the page */
 .prose { overflow-wrap: break-word; }
 .prose img { max-width: 100%; height: auto; }
+
+/* Work grid: 3 cards per row (2 on tablets, 1 on phones) */
+.work-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; }
+.work-grid .project-cover { height: auto; aspect-ratio: 16 / 10; }
+.work-grid .project-art { min-height: 0; aspect-ratio: 16 / 10; font-size: clamp(1.4rem, 2.4vw, 2.2rem); }
+.work-grid .project h3 { margin-top: 1.1rem; font-size: 1.3rem; line-height: 1.2; }
+.work-grid .project p { font-size: .95rem; }
+@media (max-width: 1000px) { .work-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .work-grid { grid-template-columns: 1fr; } }
