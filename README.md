@@ -61,6 +61,26 @@ python manage.py runserver
 | 4+ | SEO on every page: meta title, description, multiple keywords (chips), share image; site-wide defaults; Open Graph + Twitter tags; live Google preview in editors | ✅ Done |
 | 5 | Production deploy: `.env`, Gunicorn/Nginx or cPanel, backups | Next |
 
+## Deploy to a server (Ubuntu)
+
+On a fresh Ubuntu 22.04/24.04 server, as root:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Rabbi-2529/thingbd/main/deploy/setup_server.sh -o setup_server.sh
+sudo bash setup_server.sh            # or: sudo bash setup_server.sh 147.93.152.43
+thingbd-manage createsuperuser       # your dashboard login
+```
+
+It installs Python, Nginx and Gunicorn, puts the app in `/srv/thingbd` (code in `app/`,
+database in `data/`, uploads in `media/`, settings in `.env`), opens the firewall for web
+traffic and sets up daily backups in `/srv/thingbd/backups` (14 days kept).
+Previous websites on the server are archived to `/root/pre-thingbd-backup-<date>/` and disabled, not deleted.
+
+- Update to the latest GitHub version: `sudo thingbd-update`
+- Run any Django command: `thingbd-manage <command>`
+- Logs: `journalctl -u thingbd -f`
+- Change settings (email, domain): `nano /srv/thingbd/.env`, then `systemctl restart thingbd`
+
 ## Tests
 
 ```powershell
