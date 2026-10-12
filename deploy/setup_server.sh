@@ -34,8 +34,23 @@ say "Setting up Thingbd for http://$HOST"
 # ---------------------------------------------------------------------------
 say "1/9 Installing system packages"
 export DEBIAN_FRONTEND=noninteractive
-apt-get update -y
-apt-get install -y python3 python3-venv python3-dev build-essential git nginx sqlite3 curl ufw \
+
+# Ubuntu's automatic updates often hold the apt lock for a few minutes after boot. Wait for them.
+wait_for_apt() {
+  local waited=0
+  while pgrep -x 'apt|apt-get|dpkg|unattended-upgr' >/dev/null; do
+    if (( waited == 0 )); then echo "   another package install is running, waiting for it to finish..."; fi
+    if (( waited >= 600 )); then
+      ps -o pid,etime,cmd -p "$(pgrep -d, -x 'apt|apt-get|dpkg|unattended-upgr')"
+      die "apt is still busy after 10 minutes (process above). If it is stuck (ELAPSED of hours/days): kill <PID>, then: dpkg --configure -a, and run this script again."
+    fi
+    sleep 5; waited=$((waited + 5))
+  done
+}
+wait_for_apt
+apt-get -o DPkg::Lock::Timeout=300 update -y
+wait_for_apt
+apt-get -o DPkg::Lock::Timeout=300 install -y python3 python3-venv python3-dev build-essential git nginx sqlite3 curl ufw \
   libjpeg-dev zlib1g-dev libwebp-dev
 
 # ---------------------------------------------------------------------------
