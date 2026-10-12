@@ -45,6 +45,7 @@ def project_detail(request, slug):
     project = get_object_or_404(Project.objects.prefetch_related("images", "services"), slug=slug, is_active=True)
     return render(request, "website/pages/project_detail.html", {
         "project": project,
+        "more_projects": Project.objects.filter(is_active=True).exclude(pk=project.pk)[:2],
         "seo": build_seo(request, project, title=project.title,
                          description=project.summary or project.body, image=project.cover_image, og_type="article"),
     })

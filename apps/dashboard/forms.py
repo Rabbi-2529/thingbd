@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 
-from apps.core.models import SiteSettings, split_keywords
+from apps.core.models import SiteSettings, normalize_spaces, split_keywords
 
 
 class ImageInput(forms.ClearableFileInput):
@@ -54,6 +54,14 @@ class StyledFormMixin:
             else:
                 css = "input"
             widget.attrs["class"] = f"{css} {widget.attrs.get('class', '')}".strip()
+
+    def clean(self):
+        cleaned = super().clean()
+        # Rich-text HTML: turn non-breaking spaces into normal ones so text can wrap.
+        for name in self.rich_text_fields:
+            if isinstance(cleaned.get(name), str):
+                cleaned[name] = normalize_spaces(cleaned[name])
+        return cleaned
 
     def clean_meta_keywords(self):
         """Tidy keywords: trim, drop duplicates (any case), store as 'a, b, c'."""

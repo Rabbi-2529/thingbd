@@ -251,7 +251,8 @@
       },
     });
     const sync = () => {
-      textarea.value = quill.getText().trim() ? quill.getSemanticHTML() : "";
+      // Quill 2 writes every space as &nbsp;, which stops text from wrapping; store normal spaces.
+      textarea.value = quill.getText().trim() ? quill.getSemanticHTML().replace(/&nbsp;| /g, " ") : "";
     };
     quill.on("text-change", () => {
       sync();

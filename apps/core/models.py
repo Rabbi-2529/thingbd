@@ -18,6 +18,11 @@ class OrderedModel(models.Model):
         ordering = ["order", "id"]
 
 
+def normalize_spaces(html):
+    """Replace non-breaking spaces (&nbsp; / U+00A0) with normal spaces so text wraps."""
+    return (html or "").replace("&nbsp;", " ").replace(" ", " ")
+
+
 def split_keywords(value):
     """'django, SEO ,Django' -> ['django', 'SEO'] (trimmed, de-duplicated case-insensitively)."""
     seen, result = set(), []

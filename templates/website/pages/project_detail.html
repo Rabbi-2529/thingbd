@@ -1,35 +1,94 @@
 {% extends "website/base.html" %}
 
 {% block content %}
-  <section class="section page-hero">
-    <a class="back" href="{% url 'project_list' %}">← All work</a>
-    <div class="eyebrow">{% firstof project.category "Case study" %}</div>
-    <h1 class="page-title">{{ project.title }}</h1>
-    {% if project.summary %}<p class="lead">{{ project.summary }}</p>{% endif %}
-    <dl class="facts">
-      {% if project.client %}<div><dt>Client</dt><dd>{{ project.client }}</dd></div>{% endif %}
-      {% if project.services.all %}<div><dt>Services</dt><dd>{% for s in project.services.all %}<a href="{{ s.get_absolute_url }}">{{ s.title }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</dd></div>{% endif %}
-      {% if project.live_url %}<div><dt>Live</dt><dd><a href="{{ project.live_url }}" target="_blank" rel="noopener">Visit site ↗</a></dd></div>{% endif %}
-    </dl>
-    {% if project.cover_image %}<img class="feature-image" src="{{ project.cover_image.url }}" alt="{{ project.title }}">{% else %}<div class="project-art feature">{{ project.cover_text|default:project.title|linebreaksbr }}</div>{% endif %}
-  </section>
+  <article class="case">
+    <header class="section case-hero">
+      <a class="back" href="{% url 'project_list' %}">← All work</a>
+      <div class="eyebrow">{% firstof project.category "Case study" %}</div>
+      <h1 class="case-title">{{ project.title }}</h1>
+      {% if project.summary %}<p class="lead">{{ project.summary }}</p>{% endif %}
 
-  {% if project.body %}<section class="section narrow prose tight-top">{{ project.body|safe }}</section>{% endif %}
+      <dl class="case-meta">
+        {% if project.client %}<div><dt>Client</dt><dd>{{ project.client }}</dd></div>{% endif %}
+        {% if project.services.all %}
+          <div><dt>Services</dt><dd>{% for s in project.services.all %}<a href="{{ s.get_absolute_url }}">{{ s.title }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</dd></div>
+        {% endif %}
+        <div><dt>Year</dt><dd>{{ project.created_at|date:"Y" }}</dd></div>
+        {% if project.live_url %}<div class="case-meta-cta"><a class="button small" href="{{ project.live_url }}" target="_blank" rel="noopener">Visit live site <span>↗</span></a></div>{% endif %}
+      </dl>
+    </header>
 
-  {% if project.tech_list %}
-    <section class="section narrow tight-top">
-      <div class="eyebrow">Tech stack</div>
-      <ul class="tags">{% for t in project.tech_list %}<li>{{ t }}</li>{% endfor %}</ul>
+    <section class="section case-cover-wrap">
+      {% if project.cover_image %}
+        <button type="button" class="case-cover" data-lightbox="project" data-src="{{ project.cover_image.url }}" data-caption="{{ project.title }}" aria-label="Enlarge image: {{ project.title }}">
+          <span class="browser-bar" aria-hidden="true"><i></i><i></i><i></i></span>
+          <img src="{{ project.cover_image.url }}" alt="{{ project.title }}">
+          <span class="zoom-hint" aria-hidden="true">⤢ Click to enlarge</span>
+        </button>
+      {% else %}
+        <div class="project-art feature">{{ project.cover_text|default:project.title|linebreaksbr }}</div>
+      {% endif %}
     </section>
-  {% endif %}
 
-  {% if project.images.all %}
-    <section class="section tight-top">
-      <div class="gallery">
-        {% for img in project.images.all %}<figure><img src="{{ img.image.url }}" alt="{{ img.caption }}" loading="lazy">{% if img.caption %}<figcaption>{{ img.caption }}</figcaption>{% endif %}</figure>{% endfor %}
+    {% if project.body or project.tech_list %}
+      <section class="section case-body-grid">
+        <div class="prose case-body">
+          {% if project.body %}{{ project.body|safe }}{% endif %}
+        </div>
+        <aside class="case-side">
+          {% if project.tech_list %}
+            <div class="side-card">
+              <div class="eyebrow">Tech stack</div>
+              <ul class="tags">{% for t in project.tech_list %}<li>{{ t }}</li>{% endfor %}</ul>
+            </div>
+          {% endif %}
+          <div class="side-card">
+            <div class="eyebrow">Like what you see?</div>
+            <p>We can build something similar for your business.</p>
+            <a class="button small" href="{% url 'home' %}#contact">Start a project <span>↗</span></a>
+          </div>
+        </aside>
+      </section>
+    {% endif %}
+
+    {% if project.images.all %}
+      <section class="section case-gallery-wrap">
+        <div class="section-head"><div><div class="eyebrow">Gallery</div><h2>Inside the project.</h2></div></div>
+        <div class="case-gallery">
+          {% for img in project.images.all %}
+            <figure>
+              <button type="button" data-lightbox="project" data-src="{{ img.image.url }}" data-caption="{{ img.caption }}" aria-label="Enlarge image{% if img.caption %}: {{ img.caption }}{% endif %}">
+                <img src="{{ img.image.url }}" alt="{{ img.caption }}" loading="lazy">
+              </button>
+              {% if img.caption %}<figcaption>{{ img.caption }}</figcaption>{% endif %}
+            </figure>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+  </article>
+
+  {% if more_projects %}
+    <section class="section">
+      <div class="section-head">
+        <div><div class="eyebrow">More work</div><h2>Other projects.</h2></div>
+        <a class="button ghost small" href="{% url 'project_list' %}">All projects →</a>
       </div>
+      {% with projects=more_projects %}{% include "website/partials/project_grid.html" %}{% endwith %}
     </section>
   {% endif %}
 
   {% include "website/partials/cta.html" %}
+
+  {# Image popup (lightbox) #}
+  <div class="lightbox" data-lightbox-dialog role="dialog" aria-modal="true" aria-label="Image viewer" hidden>
+    <button type="button" class="lb-close" data-lb-close aria-label="Close">✕</button>
+    <button type="button" class="lb-nav lb-prev" data-lb-prev aria-label="Previous image">‹</button>
+    <figure class="lb-figure">
+      <img data-lb-img alt="">
+      <figcaption data-lb-caption></figcaption>
+    </figure>
+    <button type="button" class="lb-nav lb-next" data-lb-next aria-label="Next image">›</button>
+    <div class="lb-count" data-lb-count></div>
+  </div>
 {% endblock %}
