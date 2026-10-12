@@ -174,7 +174,7 @@ After=network.target
 
 [Service]
 User=$USER_NAME
-Group=www-data
+Group=$USER_NAME
 WorkingDirectory=$APP
 EnvironmentFile=$ENV_FILE
 RuntimeDirectory=thingbd
