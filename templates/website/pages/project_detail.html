@@ -60,7 +60,7 @@
               <button type="button" data-lightbox="project" data-src="{{ img.image.url }}" data-caption="{{ img.caption }}" aria-label="Enlarge image{% if img.caption %}: {{ img.caption }}{% endif %}">
                 <img src="{{ img.image.url }}" alt="{{ img.caption }}" loading="lazy">
               </button>
-              {% if img.caption %}<figcaption>{{ img.caption }}</figcaption>{% endif %}
+              {% if img.caption %}<figcaption><span class="cap-num">{{ forloop.counter|stringformat:"02d" }}</span>{{ img.caption }}</figcaption>{% endif %}
             </figure>
           {% endfor %}
         </div>

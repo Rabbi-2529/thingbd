@@ -330,7 +330,10 @@ a.project:hover { transform: translateY(-6px); border-color: rgba(139, 92, 246, 
 .case-gallery button:focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; }
 .case-gallery img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; transition: transform .4s; }
 .case-gallery button:hover img { transform: scale(1.04); }
-.case-gallery figcaption { margin-top: .6rem; color: var(--muted); font-size: .9rem; }
+.case-gallery figcaption { display: flex; align-items: center; gap: .65rem; margin-top: .85rem; color: var(--text); font-size: 1rem; font-weight: 600; letter-spacing: -.01em; transition: color .25s; }
+.case-gallery .cap-num { display: inline-grid; place-items: center; min-width: 2rem; height: 1.6rem; padding: 0 .45rem; border-radius: 999px; background: rgba(139, 92, 246, .18); border: 1px solid rgba(139, 92, 246, .45); color: var(--purple-light); font-size: .72rem; font-weight: 700; letter-spacing: .08em; }
+.case-gallery figure:hover figcaption, .case-gallery figure:focus-within figcaption { color: var(--purple-light); }
+.case-gallery figure:hover button, .case-gallery figure:focus-within button { border-color: rgba(139, 92, 246, .6); }
 
 /* Lightbox */
 body.lightbox-open { overflow: hidden; }
@@ -345,7 +348,10 @@ body.lightbox-open { overflow: hidden; }
 @keyframes lb-in { from { opacity: 0; } }
 .lb-figure { display: flex; flex-direction: column; align-items: center; gap: .9rem; max-width: 100%; max-height: 100%; margin: 0; }
 .lb-figure img { max-width: 100%; max-height: calc(100vh - 10rem); width: auto; height: auto; border-radius: .75rem; box-shadow: 0 30px 90px rgba(0, 0, 0, .6); }
-.lb-figure figcaption { color: var(--muted); text-align: center; }
+.lb-figure figcaption {
+  padding: .45rem 1.1rem; border: 1px solid rgba(139, 92, 246, .45); border-radius: 999px;
+  background: rgba(139, 92, 246, .2); color: #fff; font-size: 1.05rem; font-weight: 600; text-align: center;
+}
 .lb-figure figcaption:empty { display: none; }
 .lb-close, .lb-nav {
   position: absolute; display: grid; place-items: center;
