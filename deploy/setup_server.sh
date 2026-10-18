@@ -189,6 +189,11 @@ PrivateTmp=true
 WantedBy=multi-user.target
 EOF
 
+# If a domain was set up with enable_domain.sh, keep its HTTPS nginx config.
+DOMAIN_SET="$(cat "$BASE/.domain" 2>/dev/null || true)"
+if [[ -n "$DOMAIN_SET" ]]; then
+  echo "   keeping the HTTPS nginx config for $DOMAIN_SET"
+else
 cat > /etc/nginx/sites-available/thingbd <<EOF
 server {
     listen 80 default_server;
@@ -219,6 +224,7 @@ server {
     }
 }
 EOF
+fi
 ln -sf /etc/nginx/sites-available/thingbd /etc/nginx/sites-enabled/thingbd
 usermod -aG "$USER_NAME" www-data   # lets nginx read static and media files
 chmod 750 "$BASE"
@@ -258,8 +264,9 @@ cp "$APP/deploy/update.sh" /usr/local/bin/thingbd-update
 chmod 755 /usr/local/bin/thingbd-update
 
 sleep 2
-CODE="$(curl -s -o /dev/null -w '%{http_code}' -H "Host: $HOST" http://127.0.0.1/)"
-[[ "$CODE" == "200" ]] && say "Done! Website: http://$HOST   Dashboard: http://$HOST/dashboard/" \
+if [[ -n "$DOMAIN_SET" ]]; then SITE_URL="https://$DOMAIN_SET"; else SITE_URL="http://$HOST"; fi
+CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$SITE_URL/")"
+[[ "$CODE" == "200" ]] && say "Done! Website: $SITE_URL   Dashboard: $SITE_URL/dashboard/" \
   || { warn "The site answered HTTP $CODE. Check logs with: journalctl -u thingbd -n 50"; exit 1; }
 
 cat <<EOF

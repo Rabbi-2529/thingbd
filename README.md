@@ -76,6 +76,16 @@ database in `data/`, uploads in `media/`, settings in `.env`), opens the firewal
 traffic and sets up daily backups in `/srv/thingbd/backups` (14 days kept).
 Previous websites on the server are archived to `/root/pre-thingbd-backup-<date>/` and disabled, not deleted.
 
+Point a domain at the server (DNS A records for `example.com` and `www.example.com`), then switch to HTTPS:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Rabbi-2529/thingbd/main/deploy/enable_domain.sh -o enable_domain.sh
+sudo bash enable_domain.sh thingbd.com you@example.com
+```
+
+It reuses or requests a Let's Encrypt certificate, redirects www / http / the bare IP to `https://<domain>`,
+updates `.env` (allowed hosts, CSRF origins, secure cookies) and verifies automatic certificate renewal.
+
 - Update to the latest GitHub version: `sudo thingbd-update`
 - Run any Django command: `thingbd-manage <command>`
 - Logs: `journalctl -u thingbd -f`
