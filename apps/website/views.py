@@ -36,8 +36,9 @@ def service_detail(request, slug):
 def project_list(request):
     return render(request, "website/pages/project_list.html", {
         "projects": Project.objects.filter(is_active=True),
-        "seo": build_seo(request, title="Our work",
-                         description="A selection of products, platforms and brands we have shipped."),
+        "seo": build_seo(request, title="Portfolio – Software Projects & Case Studies",
+                         description="Case studies of ERP, HRM, POS, recharge, recruitment and AI CCTV software "
+                                     "built by Thingbd for businesses in Bangladesh and abroad."),
     })
 
 
@@ -56,7 +57,9 @@ def about(request):
         "team": TeamMember.objects.filter(is_active=True),
         "steps": ProcessStep.objects.filter(is_active=True),
         "stats": Stat.objects.filter(is_active=True),
-        "seo": build_seo(request, title="About us"),
+        "seo": build_seo(request, title="About Thingbd – Software Team in Dhaka",
+                         description="Meet Thingbd, a Dhaka software studio of developers, designers and SEO "
+                                     "specialists building web platforms, custom software and automation."),
     })
 
 

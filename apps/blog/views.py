@@ -20,13 +20,14 @@ def post_list(request, category_slug=None):
         category = get_object_or_404(Category, slug=category_slug)
         posts = posts.filter(category=category)
     page = Paginator(posts, 9).get_page(request.GET.get("page"))
-    title = f"{category.name} — Blog" if category else "Blog"
+    title = f"{category.name} — Blog" if category else "Blog – Software, Automation & Growth Insights"
     return render(request, "website/blog/post_list.html", {
         "page_obj": page,
         "category": category,
         "categories": _categories_with_posts(),
         "seo": build_seo(request, title=title,
-                         description="Notes on software, automation, SEO and growing a business online."),
+                         description="Practical articles on software development, business automation, SEO "
+                                     "and digital growth for businesses in Bangladesh."),
     })
 
 
