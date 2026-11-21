@@ -141,23 +141,32 @@ chmod 755 /usr/local/bin/medipos-manage
 say "6/8 Database and static files"
 medipos-manage migrate --noinput
 medipos-manage collectstatic --noinput --verbosity 0
-if $FIRST_INSTALL || [[ ! -f "$DATA/.catalog-loaded" ]]; then
-  echo "   loading the DGDA medicine catalog (about 41,000 medicines, takes a few minutes)..."
-  medipos-manage import_catalog --dgda && sudo -u "$NAME" touch "$DATA/.catalog-loaded" \
-    || warn "Catalog import failed; run later: medipos-manage import_catalog --dgda"
-fi
 medipos-manage check --deploy --fail-level ERROR >/dev/null && echo "   deploy checks passed"
 
-# Demo data: platform admin + 3 demo pharmacies (safe to re-run).
-# The example password in the MediPOS repo is public, so use a random one stored in .env.
+# Demo data: platform admin + 3 demo pharmacies, ONCE, and BEFORE the DGDA catalog.
+# seed_demo gives the demo pharmacy every medicine in the catalog: with the 28-row sample that
+# takes seconds, with the full DGDA list (~41,000 rows) it takes hours. So: demo first, catalog after.
+# The example password in the MediPOS repo is public, so a random one is stored in .env.
 if ! grep -q '^DEMO_PASSWORD=.\+' "$ENV_FILE"; then
   sed -i '/^DEMO_PASSWORD=/d' "$ENV_FILE"
   DEMO_PW="Demo-$("$VENV/bin/python" -c 'import secrets; print(secrets.token_urlsafe(9))')"
   printf '\n# Password for the demo logins created by seed_demo\nDEMO_PASSWORD=%s\n' "$DEMO_PW" >> "$ENV_FILE"
 fi
-if [[ "${SEED_DEMO:-yes}" == "yes" ]]; then
-  echo "   loading demo data (seed_demo)..."
-  medipos-manage seed_demo | tail -1 | sed 's/^/   /'
+if [[ "${SEED_DEMO:-yes}" == "yes" && ! -f "$DATA/.demo-seeded" ]]; then
+  if [[ -f "$DATA/.catalog-loaded" ]]; then
+    warn "Skipping demo data: the full DGDA catalog is already loaded (seed_demo would take hours)."
+    warn "For demo data on a fresh database, see the README (Deploy MediPOS)."
+  else
+    echo "   loading demo data (seed_demo, sample catalog)..."
+    medipos-manage seed_demo | tail -1 | sed 's/^/   /'
+    sudo -u "$NAME" touch "$DATA/.demo-seeded"
+  fi
+fi
+
+if [[ ! -f "$DATA/.catalog-loaded" ]]; then
+  echo "   loading the DGDA medicine catalog (about 41,000 medicines, takes a few minutes)..."
+  medipos-manage import_catalog --dgda && sudo -u "$NAME" touch "$DATA/.catalog-loaded" \
+    || warn "Catalog import failed; run later: medipos-manage import_catalog --dgda"
 fi
 
 # ---------------------------------------------------------------------------
