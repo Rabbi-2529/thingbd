@@ -2,6 +2,7 @@
 # Install / update MediPOS (https://github.com/Rabbi-2529/medipos) next to Thingbd on the same server.
 #
 #   sudo bash install_medipos.sh [domain] [port]        defaults: pharmacy.thingbd.com 8001
+#   SEED_DEMO=no sudo bash install_medipos.sh ...        skip the demo pharmacies (seed_demo)
 #
 # - app in /srv/medipos (code in app/, SQLite database in data/, backups in backups/)
 # - Gunicorn listens on 127.0.0.1:<port> only; nginx serves https://<domain> and forwards to it
@@ -147,6 +148,18 @@ if $FIRST_INSTALL || [[ ! -f "$DATA/.catalog-loaded" ]]; then
 fi
 medipos-manage check --deploy --fail-level ERROR >/dev/null && echo "   deploy checks passed"
 
+# Demo data: platform admin + 3 demo pharmacies (safe to re-run).
+# The example password in the MediPOS repo is public, so use a random one stored in .env.
+if ! grep -q '^DEMO_PASSWORD=.\+' "$ENV_FILE"; then
+  sed -i '/^DEMO_PASSWORD=/d' "$ENV_FILE"
+  DEMO_PW="Demo-$("$VENV/bin/python" -c 'import secrets; print(secrets.token_urlsafe(9))')"
+  printf '\n# Password for the demo logins created by seed_demo\nDEMO_PASSWORD=%s\n' "$DEMO_PW" >> "$ENV_FILE"
+fi
+if [[ "${SEED_DEMO:-yes}" == "yes" ]]; then
+  echo "   loading demo data (seed_demo)..."
+  medipos-manage seed_demo | tail -1 | sed 's/^/   /'
+fi
+
 # ---------------------------------------------------------------------------
 say "7/8 Service, scheduled jobs and backups"
 cat > /etc/systemd/system/medipos.service <<EOF
@@ -196,6 +209,7 @@ cat > /usr/local/bin/medipos-update <<EOF
 #!/usr/bin/env bash
 set -e
 /etc/cron.daily/medipos-backup || true
+export SEED_DEMO=no   # demo data only on first install
 curl -fsSL https://raw.githubusercontent.com/Rabbi-2529/thingbd/main/deploy/install_medipos.sh -o /tmp/install_medipos.sh
 bash /tmp/install_medipos.sh $DOMAIN $PORT
 EOF
@@ -267,11 +281,21 @@ sleep 3
 CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "https://$DOMAIN/")"
 if [[ "$CODE" =~ ^(200|301|302)$ ]]; then
   say "Done! MediPOS is live at https://$DOMAIN (app on 127.0.0.1:$PORT)"
+  DEMO_PW="$(grep '^DEMO_PASSWORD=' "$ENV_FILE" | cut -d= -f2-)"
+  cat <<EOF
+
+Demo logins (password for all: $DEMO_PW — also in $ENV_FILE)
+  admin@medipos.local        platform admin   https://$DOMAIN/platform/
+  owner@lazzpharma.local     Lazz Pharma (paid, 2 outlets)
+  manager@lazzpharma.local   Lazz manager
+  cashier@lazzpharma.local   Lazz cashier     POS: https://$DOMAIN/sales/pos/
+  owner@greenlife.local      Green Life (trial ending)
+  owner@sunrise.local        Sunrise (trial expired)
+EOF
   if $FIRST_INSTALL; then cat <<EOF
 
 Next steps
-  1. Create the platform admin:   medipos-manage createsuperuser
-     then sign in at https://$DOMAIN/platform/
+  1. Your own platform admin:     medipos-manage createsuperuser
   2. Update later:                medipos-update
   3. Logs:                        journalctl -u medipos -f
   4. Email / SMS settings:        nano $ENV_FILE   then  systemctl restart medipos
