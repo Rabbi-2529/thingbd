@@ -44,7 +44,11 @@ shopt -s nullglob
 for f in /etc/nginx/sites-enabled/* /etc/nginx/conf.d/*.conf; do
   real="$(readlink -f "$f")"
   [[ "$real" == "$SITE" ]] && continue
-  if grep -qE "server_name[^;]*\b($DOMAIN|$WWW)\b" "$real" 2>/dev/null || grep -q "default_server" "$real" 2>/dev/null; then
+  grep -q "Managed by thingbd/deploy/install_medipos.sh" "$real" 2>/dev/null && continue   # other apps (MediPOS)
+  # exact host names only, so sub-domains such as pharmacy.$DOMAIN are left alone
+  DOMAIN_RE="${DOMAIN//./[.]}"; WWW_RE="${WWW//./[.]}"
+  if grep -qE "server_name([^;]*[[:space:]])($DOMAIN_RE|$WWW_RE)([[:space:];]|$)" "$real" 2>/dev/null \
+     || grep -q "default_server" "$real" 2>/dev/null; then
     mkdir -p "$OLD"
     cp -a "$real" "$OLD/"
     rm -f "$f"

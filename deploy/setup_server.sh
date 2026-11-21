@@ -74,7 +74,7 @@ if [[ -d /var/www ]] && [[ -n "$(ls -A /var/www 2>/dev/null)" ]]; then
 fi
 shopt -s nullglob
 for site in /etc/nginx/sites-enabled/* /etc/nginx/conf.d/*.conf; do
-  [[ "$(basename "$site")" == "thingbd" || "$(basename "$site")" == "thingbd.conf" ]] && continue
+  case "$(basename "$site")" in thingbd|thingbd.conf|medipos|medipos.conf) continue ;; esac
   mkdir -p "$OLD/nginx"
   cp -a "$(readlink -f "$site")" "$OLD/nginx/" 2>/dev/null || true
   rm -f "$site"
